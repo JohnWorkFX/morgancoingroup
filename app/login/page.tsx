@@ -65,7 +65,7 @@ const Page = () => {
             <button className='inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2  hover:bg-slate-700'>Sign In</button>
         </form>
         <p className='text-sm w-full text-center text-[#05803a]'>
-            <span> Don't have an account?</span>
+            <span> Don&apos;t have an account?</span>
            <a href="/register">
            <span className='text-white ml-2 font-bold'>Sign Up</span>
            </a>

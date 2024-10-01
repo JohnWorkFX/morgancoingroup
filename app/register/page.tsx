@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image'
-const page = () => {
+const Page = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
 
     useEffect(() => {
@@ -92,4 +92,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
