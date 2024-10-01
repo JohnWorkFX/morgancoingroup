@@ -2,7 +2,7 @@ import React from 'react'
 import Header from '../components/Header'
 import ContactForm from '../components/ContactForm'
 import Footer from '../components/footer'
-const page = () => {
+const Page = () => {
   return (
     <div>
       <Header/>
@@ -12,4 +12,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

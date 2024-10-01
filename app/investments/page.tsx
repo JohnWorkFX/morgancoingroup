@@ -5,7 +5,7 @@ import Traders from '../components/Traders'
 import Payments from '../components/Payments'
 import Referal from '../components/referal'
 import Footer from '../components/footer'
-const page = () => {
+const Page = () => {
   return (
     <div>
       <Header/>
@@ -18,4 +18,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

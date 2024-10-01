@@ -81,7 +81,7 @@ const Referal = () => {
                 10% Bonus Crypto Rewards
               </h3>
               <p className="text-sm">
-                Earn up to 10% of your referral's investment as bonus crypto
+                Earn up to 10% of your referral&apos;s investment as bonus crypto
                 rewards.
               </p>
             </div>

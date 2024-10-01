@@ -1,6 +1,6 @@
 
 
-import React, { useState } from "react";
+import React from "react";
 
 const DropDownMenu = () => {
 
@@ -33,7 +33,7 @@ const DropDownMenu = () => {
         <li className="p-2 hover:bg-custom-green rounded-md text-center">Contact</li>
         </a>
         <a href="/faq">
-        <li className="p-2 hover:bg-custom-green rounded-md text-center">FAQ's</li>
+        <li className="p-2 hover:bg-custom-green rounded-md text-center">FAQ&apos;s</li>
         </a>
         <li className="p-2 hover:bg-custom-green rounded-md text-center">How to Buy Crypto</li>
       </ul>

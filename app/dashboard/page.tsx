@@ -3,7 +3,7 @@ import DashBoardNav from "../components/DashBoardNav";
 import BitCoinChart from "../components/BitCoinChart";
 import DepositCrypto from "../components/DepositCrypto";
 
-const page = () => {
+const Page = () => {
   return (
     <div>
       <DashBoardNav />
@@ -112,4 +112,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
