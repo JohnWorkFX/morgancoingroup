@@ -37,7 +37,7 @@ const Page = () => {
       password,
       username,
       fullname,
-      phoneNumber,
+      phone_number: phoneNumber,
       country,
     };
 
