@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/router';
 import Image from "next/image";
 const Page = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +17,8 @@ const Page = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     
     e.preventDefault();
+
+    const router = useRouter();
 
     // Clear previous errors
     setError('');
@@ -55,7 +58,15 @@ const Page = () => {
       body: JSON.stringify(formData),
     })
       .then(response => response.json())
-      .then(data => console.log(data))
+      .then(data => {
+        console.log(data);
+        // Check if the registration was successful
+        if (data.message === 'user created successfully') {
+            router.push('/login');
+        } else {
+            setError(data.message || 'Registration failed');
+        }
+    })
       .catch(error => console.error('Error:', error));
     
 
@@ -177,6 +188,7 @@ const Page = () => {
               type="email"
               className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
               placeholder="Email"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -205,6 +217,7 @@ const Page = () => {
               type="password"
               className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
               placeholder="Password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
@@ -219,6 +232,7 @@ const Page = () => {
               type="password"
               className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
               placeholder="Enter Passworrd again"
+              value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
