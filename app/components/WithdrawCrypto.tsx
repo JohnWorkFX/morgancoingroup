@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import {
   Dialog,
@@ -10,11 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-const DepositCrypto = () => {
-  const textRef = useRef<HTMLDivElement | null>(null);
-  const [buttonText, setButtonText] = useState("Copy");
-
+const WithdrawCrypto = () => {
   const { data: session } = useSession();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -23,8 +19,7 @@ const DepositCrypto = () => {
   const [amount, setAmount] = useState(0);
   const [address, setAddress] = useState("");
   const [error, setError] = useState("");
-  const plan = "Gold";
-  const description = "Investment in Gold plan";
+  const description = "Withdrawal to my wallet";
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,13 +36,12 @@ const DepositCrypto = () => {
     const formData = {
       wallet_address: address,
       amount: amount,
-      plan: plan,
       description: description,
     };
 
     console.log("Form data:", formData);
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/transact/invest`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/transact/withdraw`;
 
     fetch(url, {
       method: "POST",
@@ -81,45 +75,29 @@ const DepositCrypto = () => {
     setIsSubmitted(false); // Reset submission status when dialog closes
   };
 
-  const copyText = () => {
-    if (textRef.current) {
-      const textToCopy = textRef.current.innerText;
-      navigator.clipboard
-        .writeText(textToCopy)
-        .then(() => {
-          setButtonText("Copied!");
-          // Reset the button text after 2 seconds
-          setTimeout(() => setButtonText("Copy"), 2000);
-        })
-        .catch((err) => {
-          console.error("Failed to copy text: ", err);
-        });
-    }
-  };
-
   return (
     <div>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <button
-            className="bg-custom-green text-black py-2 px-4 text-xs rounded-md"
+            className="text-custom-green border border-custom-green py-2 px-4 text-xs rounded-md"
             onClick={() => setIsDialogOpen(true)}
           >
-            Buy Crypto
+            Withdraw
           </button>
         </DialogTrigger>
         <DialogContent className="max-w-[435px] md:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Make an Investment</DialogTitle>
+            <DialogTitle>Withdraw Your Funds</DialogTitle>
             <DialogDescription>
-              Fill out the form and follow instructions for your payment to be
-              verified.
+              Fill out the form and follow instructions for your withdrawal to
+              be completed.
             </DialogDescription>
           </DialogHeader>
           {isSubmitted ? ( // Conditional rendering for success GIF
             <div className="text-center">
               <h3 className="text-lg font-bold mb-2">
-                Thank you for your investment!
+                Your transaction has been submitted successfully.
               </h3>
               <img
                 src="/images/successful.gif"
@@ -140,13 +118,13 @@ const DepositCrypto = () => {
               </DialogClose>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 py-2">
-              <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="space-y-4  py-2">
+              <div className="space-y-2 ">
                 <label
-                  htmlFor="amount"
-                  className="text-sm font-medium leading-none text-left flex justify-start"
+                  htmlFor="email"
+                  className="text-sm font-medium leading-none text-left flex justify-start "
                 >
-                  Amount to pay ($)
+                  Amount to withdraw ($)
                 </label>
                 <input
                   type="number"
@@ -157,10 +135,10 @@ const DepositCrypto = () => {
               </div>
               <div className="space-y-2">
                 <label
-                  htmlFor="address"
+                  htmlFor="email"
                   className="text-sm font-medium leading-none"
                 >
-                  Wallet Address you&apos;re paying from
+                  Wallet Address you&apos;re paying to
                 </label>
                 <input
                   type="text"
@@ -169,41 +147,14 @@ const DepositCrypto = () => {
                   onChange={(e) => setAddress(e.target.value)}
                 />
               </div>
-              <div>
-                <h3 className="font-bold text-sm">
-                  Send BTC to the wallet address below:
-                </h3>
-                <div className="md:flex gap-2 items-center space-y-2 md:space-y-0">
-                  <p
-                    ref={textRef}
-                    className="text-sm text-center justify-end items-end"
-                  >
-                    bc1qf687zsvep7ymjvn5kglvzjdl2r0h2ek5w7uvad
-                  </p>
-                  <button
-                    type="button"
-                    onClick={copyText}
-                    className="h-10 px-5 py-2 bg-custom-green text-black rounded font-medium text-sm"
-                  >
-                    {buttonText}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold">
-                  After making payment, click the PAID button.
-                </h3>
-              </div>
 
               <div className="flex justify-end space-x-4">
-                {!isSubmitted && (
-                  <button
-                    type="submit"
-                    className="h-10 px-5 py-2 bg-black text-white rounded font-medium text-sm"
-                  >
-                    Paid
-                  </button>
-                )}
+                <button
+                  type="submit"
+                  className="h-10 px-5 py-2 bg-black text-white rounded font-medium text-sm"
+                >
+                  Withdraw
+                </button>
                 <DialogClose asChild>
                   <button
                     type="button"
@@ -221,9 +172,9 @@ const DepositCrypto = () => {
             </p>
           )}
           <div>
-            <h1 className="text-center">Need other forms of Payments?</h1>
+            <h1 className="text-center ">Need other forms of Payments?</h1>
             <p className="text-center text-sm text-[#108f81]">
-              <a href="">Contact customer care</a>
+              <a href="">Contact costumer care</a>
             </p>
           </div>
         </DialogContent>
@@ -232,4 +183,4 @@ const DepositCrypto = () => {
   );
 };
 
-export default DepositCrypto;
+export default WithdrawCrypto;

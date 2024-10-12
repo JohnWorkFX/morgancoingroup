@@ -1,5 +1,7 @@
 "use client";
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,10 +16,12 @@ import { GrTransaction } from "react-icons/gr";
 
 const DashBoardNav = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session } = useSession();
 
   const toggleSidenav = () => {
     setIsOpen((prev) => !prev); // Toggle the sidenav state
   };
+  console.log(session);
   return (
     <div className="flex h-16 sticky text-white border-b px-4 md:px-6">
       <nav className="flex justify-between w-full">
@@ -32,7 +36,10 @@ const DashBoardNav = () => {
             className="h-10 w-10 text-white block md:hidden"
             onClick={toggleSidenav}
           />
-          <div className="flex items-center md:border gap-2 border-custom-green text-custom-green py-2 px-3 m-3 rounded-md cursor-pointer">
+          <a
+            href="/dashboard"
+            className="flex items-center md:border gap-2 border-custom-green text-custom-green py-2 px-3 m-3 rounded-md cursor-pointer"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -50,14 +57,17 @@ const DashBoardNav = () => {
               <path d="M12 3v6"></path>
             </svg>
             <a className="hidden md:block">DashBoard</a>
-          </div>
-          <div className="flex items-center md:border py-2 gap-2 border-custom-green text-custom-green px-3 m-3 rounded-md cursor-pointer ">
-          <GrTransaction className="h-6 w-6 hidden md:block" />
+          </a>
+          <a
+            href="/transactions"
+            className="flex items-center md:border py-2 gap-2 border-custom-green text-custom-green px-3 m-3 rounded-md cursor-pointer "
+          >
+            <GrTransaction className="h-6 w-6 hidden md:block" />
             <a className="hidden md:block ">Transactions</a>
-          </div>
+          </a>
         </div>
         <div className="flex gap-4 items-center">
-          <p>Hello John Doe</p>
+          <p>Hello, {session?.user.username}</p>
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div className="bg-white text-black rounded-full inline-flex justify-center h-10 w-10 items-center font-medium">
@@ -82,7 +92,9 @@ const DashBoardNav = () => {
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem>
+                <button onClick={() => signOut()}>Log Out</button>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

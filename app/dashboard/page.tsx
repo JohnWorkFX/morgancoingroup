@@ -1,9 +1,48 @@
-import React from "react";
+'use client'
+import React, {useState, useEffect} from "react";
+import { useSession } from "next-auth/react";
 import DashBoardNav from "../components/DashBoardNav";
 import BitCoinChart from "../components/BitCoinChart";
 import DepositCrypto from "../components/DepositCrypto";
+import WithdrawCrypto from "../components/WithdrawCrypto";
+
+
 
 const Page = () => {
+
+  const {data: session} = useSession()
+  const [grandBalance, setGrandBalance] = useState(0)
+  const [investment, setInvestment] = useState(0)
+  const [ROI, setROI] = useState(0)
+
+  const fetchBalance = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transact/balance`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`, 
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch balance');
+      }
+
+      const data = await response.json();
+      console.log(data)
+      setGrandBalance(data.data.balance);
+      setInvestment(data.data.investment);
+      setROI(data.data.ROI);
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+    }
+  };
+
+  
+  useEffect(() => {
+    fetchBalance();
+  }, );
   return (
     <div>
       <DashBoardNav />
@@ -29,8 +68,10 @@ const Page = () => {
               </svg>
             </div>
             <div className="p-6 pt-0 flex w-full justify-between">
-              <h3 className="text-2xl font-bold">$0</h3>
-              <button className="text-custom-green border border-custom-green py-2 px-4 text-xs rounded-md">Withdraw</button>
+              <h3 className="text-2xl font-bold">${grandBalance}</h3>
+              <div className="">
+              <WithdrawCrypto/>
+            </div>
             </div>
           </div>
           <div className="rounded-lg border shadow-sm w-full ">
@@ -55,7 +96,7 @@ const Page = () => {
               </svg>
             </div>
             <div className="p-6 pt-0">
-              <h3 className="text-2xl font-bold">$0</h3>
+              <h3 className="text-2xl font-bold">${investment}</h3>
             </div>
           </div>
           <div className="rounded-lg border shadow-sm w-full ">
@@ -77,7 +118,7 @@ const Page = () => {
               </svg>
             </div>
             <div className="p-6 pt-0">
-              <h3 className="text-2xl font-bold">$0</h3>
+              <h3 className="text-2xl font-bold">${ROI}</h3>
             </div>
           </div>
           <div className="rounded-lg border shadow-sm w-full ">

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SessionProviderWrapper from "./components/SessionProviderWrapper";
 import { Manrope } from 'next/font/google'
+
 
 const manrope = Manrope({
   subsets: ['latin'],
@@ -22,7 +24,7 @@ export default function RootLayout({
       <body
         className={manrope.className}
       >
-        {children}
+        <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
     </html>
   );
