@@ -6,6 +6,7 @@ const Page = () => {
   return (
     <div>
       <Header/>
+
       <FAQ/>
       <Footer/>
     </div>
