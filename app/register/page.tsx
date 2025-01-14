@@ -1,8 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 const Page = () => {
+  const router = useRouter();
+
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -11,26 +14,36 @@ const Page = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [country, setCountry] = useState("");
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  const [loading, setLoading] = useState(false);
+
+  
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     
     e.preventDefault();
 
-    const router = useRouter();
+    
 
     // Clear previous errors
-    setError('');
+    
+    setError("");
+    setSuccess(false);
+    setLoading(true);
 
     // Basic validation
     if (password.length < 8) {
       setError('Password must be at least 8 characters long.');
+      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
+      setLoading(false);
       return;
     }
 
@@ -62,9 +75,14 @@ const Page = () => {
         console.log(data);
         // Check if the registration was successful
         if (data.message === 'user created successfully') {
-            router.push('/login');
+          setSuccess(true);
+          setLoading(false);
+          setTimeout(() => {
+            router.push("/login");
+          }, 3000);
         } else {
             setError(data.message || 'Registration failed');
+            setLoading(false);
         }
     })
       .catch(error => console.error('Error:', error));
@@ -154,107 +172,118 @@ const Page = () => {
         <h6>
           {formattedDateInWords} {formattedTime}
         </h6>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4 w-full">
-          <div className="space-y-2">
-            <label
-              htmlFor="username"
-              className="text-sm font-medium leading-none"
-            >
-              Username
-            </label>
-            <input
-              type="text"
-              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-              placeholder="Enter Username"
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium leading-none">
-              Full Name
-            </label>
-            <input
-              type="text"
-              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-              placeholder="Enter Full Name"
-              onChange={(e) => setFullname(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="Email" className="text-sm font-medium leading-none">
-              Email
-            </label>
-            <input
-              type="email"
-              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label
-              htmlFor="phone number"
-              className="text-sm font-medium leading-none"
-            >
-              Phone Number
-            </label>
-            <input
-              type="text"
-              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-              placeholder="Phone Number"
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium leading-none"
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label
-              htmlFor="country"
-              className="text-sm font-medium leading-none"
-            >
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-              placeholder="Enter Passworrd again"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label
-              htmlFor="country"
-              className="text-sm font-medium leading-none"
-            >
-              Country
-            </label>
-            <input
-              type="text"
-              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-              placeholder="Country"
-              onChange={(e) => setCountry(e.target.value)}
-            />
-          </div>
-          {error && <p className="text-red-500 items-center mt-5 text-body-s">{error}</p>}
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2  hover:bg-slate-700">
-            Register
-          </button>
-        </form>
+        {success? ( <div className="w-full">
+              <img
+                src="/images/successful.gif"
+                alt="Success"
+                className="mx-auto"
+              />
+              <h1 className="text-center text-custom-blue text-heading-s mt-5">
+                Registration Successful!
+              </h1>
+            </div>):(
+              <form onSubmit={handleSubmit} className="grid gap-4 py-4 w-full">
+              <div className="space-y-2">
+                <label
+                  htmlFor="username"
+                  className="text-sm font-medium leading-none"
+                >
+                  Username
+                </label>
+                <input
+                  type="text"
+                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+                  placeholder="Enter Username"
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium leading-none">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+                  placeholder="Enter Full Name"
+                  onChange={(e) => setFullname(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="Email" className="text-sm font-medium leading-none">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="phone number"
+                  className="text-sm font-medium leading-none"
+                >
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+                  placeholder="Phone Number"
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="password"
+                  className="text-sm font-medium leading-none"
+                >
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="country"
+                  className="text-sm font-medium leading-none"
+                >
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+                  placeholder="Enter Passworrd again"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="country"
+                  className="text-sm font-medium leading-none"
+                >
+                  Country
+                </label>
+                <input
+                  type="text"
+                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+                  placeholder="Country"
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              </div>
+              {error && <p className="text-red-500 items-center mt-5 text-body-s">{error}</p>}
+              <button className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2  hover:bg-slate-700">
+              {loading ? "Creating..." : "SignUp"}
+              </button>
+            </form>
+            )}
         <p className="text-sm w-full text-center text-[#05803a]">
           <span> Already have an account?</span>
           <a href="/login">
