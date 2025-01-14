@@ -12,6 +12,7 @@ interface Transaction {
   status: string;
   amount: string;
   created_at: string;
+  date:string
   description: string;
 }
 
@@ -220,7 +221,7 @@ const Page = () => {
                         className="border-b transition-colors hover:bg-slate-600"
                       >
                         <td className="p-4 align-middle">
-                          {transaction.created_at}
+                        {transaction.date ? transaction.date : transaction.created_at}
                         </td>
                         <td className="p-4 align-middle">
                           ${transaction.amount}
