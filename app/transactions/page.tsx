@@ -79,6 +79,7 @@ const Page = () => {
     if (session?.accessToken) {
       fetchBalance();
       fetchTransactions();
+      console.log(transactions)
     }
   }, [session]);
   return (

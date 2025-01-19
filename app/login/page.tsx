@@ -7,20 +7,22 @@ const Page = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>)=> {
     event.preventDefault();
     setErr('')
-
+    setLoading(true);
     const result = await signIn('credentials',{
       redirect: false,
       email,
       password
     });
-   
+    
     if (result?.error){
       setErr(result.error)
+      setLoading(false);
     }else{
       router.push('/dashboard')
     }
@@ -134,7 +136,7 @@ const Page = () => {
           </div>
           {err && <p className="text-red-500 mt-2">{err}</p>}
           <button className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2  hover:bg-slate-700">
-            Sign In
+          {loading ? "Fetching..." : "Login"}
           </button>
         </form>
         <p className="text-sm w-full text-center text-[#05803a]">
