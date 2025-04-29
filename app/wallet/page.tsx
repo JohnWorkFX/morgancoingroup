@@ -1,11 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  Bell,
-  Globe,
-  ChevronDown,
-  Menu
-} from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import DashBoardNav from "../components/DashBoardNav";
 import { LuMenuSquare } from "react-icons/lu";
@@ -83,6 +77,7 @@ const WalletPage = () => {
   const [search, setSearch] = useState("");
   const [hideSmall, setHideSmall] = useState(false);
   const [tab, setTab] = useState("Coin View");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [prices, setPrices] = useState<Record<string, number>>({});

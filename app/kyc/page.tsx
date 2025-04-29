@@ -84,7 +84,7 @@ const KYCPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm mb-1">Upload ID (Passport, Driver's License, etc.)</label>
+                <label className="block text-sm mb-1">Upload ID (Passport, Driver&apos;s License, etc.)</label>
                 <input
                   type="file"
                   name="idFile"

@@ -11,7 +11,7 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const verified = searchParams.get('verified');
+  const verified = searchParams ? searchParams.get('verified') : null;
 
   useEffect(() => {
     if (verified === 'true') {
@@ -41,6 +41,7 @@ const Page = () => {
       } else {
         router.push('/dashboard');
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setErr('An error occurred during login');
     } finally {
@@ -68,6 +69,7 @@ const Page = () => {
       } else {
         setErr(data.message || 'Failed to send verification email');
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setErr('An error occurred while sending verification email');
     } finally {

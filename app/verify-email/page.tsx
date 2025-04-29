@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -45,7 +45,8 @@ const Page = () => {
         setError(data.message || "Verification failed");
       }
     } catch (error) {
-      setError("An error occurred during verification");
+      setError("An error occurred during verification")
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -77,6 +78,7 @@ const Page = () => {
       }
     } catch (error) {
       setError("An error occurred while resending verification email");
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ const Page = () => {
         <div className="text-center w-full">
           <h1 className="text-2xl font-bold mb-4">Verify Your Email</h1>
           <p className="mb-2">
-            We've sent a verification code to:
+            We&apos;ve sent a verification code to:
           </p>
           <p className="font-semibold mb-4">{email}</p>
           
@@ -159,7 +161,7 @@ const Page = () => {
                 </p>
               ) : (
                 <p className="mb-4">
-                  Haven't received the code?{" "}
+                  Haven&apos;t received the code?{" "}
                   <button
                     onClick={handleResendVerification}
                     disabled={loading}
