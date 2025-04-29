@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 
-const Page = () => {
+// Create a client component that uses useSearchParams
+const VerifyEmailForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -191,6 +192,15 @@ const Page = () => {
         </p>
       </div>
     </div>
+  );
+};
+
+// Main page component with Suspense boundary
+const Page = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailForm />
+    </Suspense>
   );
 };
 
