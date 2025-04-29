@@ -1,33 +1,80 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+
 const Page = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const verified = searchParams.get('verified');
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>)=> {
-    event.preventDefault();
-    setErr('')
-    setLoading(true);
-    const result = await signIn('credentials',{
-      redirect: false,
-      email,
-      password
-    });
-    
-    if (result?.error){
-      setErr(result.error)
-      setLoading(false);
-    }else{
-      router.push('/dashboard')
+  useEffect(() => {
+    if (verified === 'true') {
+      setErr('Email verified successfully! You can now log in.');
     }
-  }
-  
+  }, [verified]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErr('');
+    setLoading(true);
+
+    try {
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password
+      });
+
+      if (result?.error) {
+        if (result.error.includes('verify')) {
+          setErr('Please verify your email first');
+          // Add resend verification button
+          return;
+        }
+        setErr(result.error);
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      setErr('An error occurred during login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setLoading(true);
+    setErr('');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      } else {
+        setErr(data.message || 'Failed to send verification email');
+      }
+    } catch (error) {
+      setErr('An error occurred while sending verification email');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -117,7 +164,8 @@ const Page = () => {
               type="email"
               className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
               placeholder="Email"
-              onChange={(e)=> setEmail(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -131,12 +179,33 @@ const Page = () => {
               type="password"
               className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
               placeholder="Password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          {err && <p className="text-red-500 mt-2">{err}</p>}
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2  hover:bg-slate-700">
-          {loading ? "Fetching..." : "Login"}
+          {err && (
+            <div className="text-center">
+              <p className={`${err.includes('verified successfully') ? 'text-green-500' : 'text-red-500'} mt-2`}>
+                {err}
+              </p>
+              {err.includes('verify') && (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  className="text-green-500 hover:underline mt-2"
+                  disabled={loading}
+                >
+                  Resend verification email
+                </button>
+              )}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2 hover:bg-slate-700 disabled:opacity-50"
+          >
+            {loading ? "Processing..." : "Login"}
           </button>
         </form>
         <p className="text-sm w-full text-center text-[#05803a]">

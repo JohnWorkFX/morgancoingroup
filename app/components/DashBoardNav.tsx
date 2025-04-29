@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from "react";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import React from "react";
+import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,64 +11,40 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LuMenuSquare } from "react-icons/lu";
-import DashBoardSideNav from "./DashBoardSideNav";
-import { GrTransaction } from "react-icons/gr";
 
 const DashBoardNav = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
 
-  const toggleSidenav = () => {
-    setIsOpen((prev) => !prev); // Toggle the sidenav state
-  };
-  console.log(session);
   return (
-    <div className="flex h-16 sticky text-white border-b px-4 md:px-6">
-      <nav className="flex justify-between w-full">
-        {isOpen && (
-          <DashBoardSideNav
-            sidebarToggle={toggleSidenav}
-            sidebarStatus={isOpen}
-          />
-        )}
-        <div className="flex items-center gap-2 text-lg font-medium  md:text-sm">
-          <LuMenuSquare
-            className="h-10 w-10 text-white block md:hidden"
-            onClick={toggleSidenav}
-          />
-          <a
-            href="/dashboard"
-            className="flex items-center md:border gap-2 border-custom-green text-custom-green py-2 px-3 m-3 rounded-md cursor-pointer"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              className="lucide lucide-package2 h-6 w-6 hidden md:block"
-            >
-              <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
-              <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
-              <path d="M12 3v6"></path>
-            </svg>
-            <a className="hidden md:block">DashBoard</a>
-          </a>
-          <a
-            href="/transactions"
-            className="flex items-center md:border py-2 gap-2 border-custom-green text-custom-green px-3 m-3 rounded-md cursor-pointer "
-          >
-            <GrTransaction className="h-6 w-6 hidden md:block" />
-            <a className="hidden md:block ">Transactions</a>
+    <nav className="bg-black border-b h-16 sticky top-0 z-50">
+      <div className="container mx-auto flex items-center justify-between h-full px-4">
+        {/* Logo */}
+        <div className="flex items-center gap-4">
+          <a href="/dashboard" className="flex items-center">
+            <Image src="/images/logo.webp" alt="Logo" height={32} width={32} />
+            <span className="ml-2 text-white font-semibold text-lg hidden md:block">MorganCoinGroup</span>
           </a>
         </div>
+        {/* Center nav links */}
+        <div className="hidden  text-custom-green">
+          <ul className="flex space-x-8 text-base font-medium">
+            <li>
+              <a href="/dashboard" className="py-2.5 hover:text-yellow-400 transition">Dashboard</a>
+            </li>
+            <li>
+              <a href="/market" className="py-2.5 hover:text-yellow-400 transition">Market</a>
+            </li>
+            <li>
+              <a href="/transactions" className="py-2.5 hover:text-yellow-400 transition">History</a>
+            </li>
+            <li>
+              <a href="/wallet" className="py-2.5 hover:text-yellow-400 transition">Wallet</a>
+            </li>
+          </ul>
+        </div>
+        {/* User section (keep this as requested) */}
         <div className="flex gap-4 items-center">
-          <p>Hello, {session?.user.username}</p>
+          <p className="text-white">Hello, {session?.user.username}</p>
           <DropdownMenu>
             <DropdownMenuTrigger>
               <div className="bg-white text-black rounded-full inline-flex justify-center h-10 w-10 items-center font-medium">
@@ -78,9 +55,9 @@ const DashBoardNav = () => {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   className="lucide lucide-circle-user h-5 w-5"
                 >
                   <circle cx="12" cy="12" r="10"></circle>
@@ -98,8 +75,8 @@ const DashBoardNav = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </nav>
-    </div>
+      </div>
+    </nav>
   );
 };
 

@@ -1,158 +1,75 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 const Page = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+  });
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [fullname, setFullname] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [country, setCountry] = useState("");
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  const [loading, setLoading] = useState(false);
-
-  
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    
-    e.preventDefault();
-
-    
-
-    // Clear previous errors
-    
-    setError("");
-    setSuccess(false);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErr("");
     setLoading(true);
 
-    // Basic validation
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+    if (formData.password !== formData.confirmPassword) {
+      setErr("Passwords do not match");
       setLoading(false);
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      setLoading(false);
-      return;
-    }
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          username: `${formData.firstName.toLowerCase()}.${formData.lastName.toLowerCase()}`,
+          fullname: `${formData.firstName} ${formData.lastName}`,
+          phone_number: formData.phone,
+          country: "US",
+        }),
+      });
 
-    
-    const formData = {
-      email,
-      password,
-      username,
-      fullname,
-      phone_number: phoneNumber,
-      country,
-    };
+      const data = await response.json();
 
-    console.log('Form data:', formData);
-
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/register`;
-
-
-   //posting to backend
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        // Check if the registration was successful
-        if (data.message === 'user created successfully') {
-          setSuccess(true);
-          setLoading(false);
-          setTimeout(() => {
-            router.push("/login");
-          }, 3000);
-        } else {
-            setError(data.message || 'Registration failed');
-            setLoading(false);
-        }
-    })
-      .catch(error => console.error('Error:', error));
-    
-
-    // Clear form fields
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
-  };
-
-  useEffect(() => {
-    const timerId = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000); // Update every second
-
-    return () => clearInterval(timerId); // Cleanup on component unmount
-  }, []);
-
-  const formatDateToWords = (date: Date): string => {
-    const day = date.getDate();
-    const dayNames = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const dayOfWeek = dayNames[date.getDay()]; // Get day of the week
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    const month = monthNames[date.getMonth()];
-    const year = date.getFullYear();
-
-    // Convert day to ordinal (1st, 2nd, 3rd, etc.)
-    const ordinalSuffix = (day: number): string => {
-      if (day > 3 && day < 21) return "th"; // Special case for 11-20
-      switch (day % 10) {
-        case 1:
-          return "st";
-        case 2:
-          return "nd";
-        case 3:
-          return "rd";
-        default:
-          return "th";
+      if (response.ok) {
+        // Redirect to email verification page
+        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+      } else {
+        setErr(data.message || "Registration failed");
       }
-    };
-
-    return `${dayOfWeek} ${day}${ordinalSuffix(day)} of ${month}  ${year}`;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      setErr("An error occurred during registration");
+    } finally {
+      setLoading(false);
+    }
   };
-  const formattedTime = currentTime.toLocaleTimeString();
-  const formattedDateInWords = formatDateToWords(currentTime);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
     <div
-      className="w-full min-h-dvh  py-5 px-6 md:px-0 text-white"
+      className="w-full min-h-dvh py-10 px-6 md:px-0 text-white"
       style={{ backgroundImage: `url('/images/auth-bg.jpeg')` }}
     >
       <h2 className="w-full text-center text-lg md:text-2xl flex flex-col md:flex-row justify-center items-center gap-4">
@@ -165,127 +82,106 @@ const Page = () => {
         />
         Morgan Group Coin Investment
       </h2>
-      <h4 className="w-full text-center text-lg md:text-2xl my-4 font-bold">
-        Create an Account
+      <h4 className="w-full text-center text-lg md:text-2xl my-4 md:my-8 font-bold">
+        Create Account
       </h4>
       <div className="max-w-[500px] min-h-[300px] mx-auto flex flex-col justify-start items-start gap-6">
-        <h6>
-          {formattedDateInWords} {formattedTime}
-        </h6>
-        {success? ( <div className="w-full">
-              <img
-                src="/images/successful.gif"
-                alt="Success"
-                className="mx-auto"
-              />
-              <h1 className="text-center text-custom-blue text-heading-s mt-5">
-                Registration Successful!
-              </h1>
-            </div>):(
-              <form onSubmit={handleSubmit} className="grid gap-4 py-4 w-full">
-              <div className="space-y-2">
-                <label
-                  htmlFor="username"
-                  className="text-sm font-medium leading-none"
-                >
-                  Username
-                </label>
-                <input
-                  type="text"
-                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-                  placeholder="Enter Username"
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium leading-none">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-                  placeholder="Enter Full Name"
-                  onChange={(e) => setFullname(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="Email" className="text-sm font-medium leading-none">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="phone number"
-                  className="text-sm font-medium leading-none"
-                >
-                  Phone Number
-                </label>
-                <input
-                  type="text"
-                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-                  placeholder="Phone Number"
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium leading-none"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="country"
-                  className="text-sm font-medium leading-none"
-                >
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-                  placeholder="Enter Passworrd again"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="country"
-                  className="text-sm font-medium leading-none"
-                >
-                  Country
-                </label>
-                <input
-                  type="text"
-                  className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
-                  placeholder="Country"
-                  onChange={(e) => setCountry(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-red-500 items-center mt-5 text-body-s">{error}</p>}
-              <button className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2  hover:bg-slate-700">
-              {loading ? "Creating..." : "SignUp"}
-              </button>
-            </form>
-            )}
+        <form onSubmit={handleSubmit} className="grid gap-4 py-4 w-full">
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-medium leading-none">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="firstName" className="text-sm font-medium leading-none">
+              First Name
+            </label>
+            <input
+              type="text"
+              name="firstName"
+              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+              placeholder="First Name"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="lastName" className="text-sm font-medium leading-none">
+              Last Name
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="phone" className="text-sm font-medium leading-none">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+              placeholder="Phone Number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium leading-none">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-0"
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          {err && <p className="text-red-500 mt-2 text-center">{err}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-[#05803a] h-10 px-4 py-2 hover:bg-slate-700 disabled:opacity-50"
+          >
+            {loading ? "Processing..." : "Register"}
+          </button>
+        </form>
         <p className="text-sm w-full text-center text-[#05803a]">
-          <span> Already have an account?</span>
+          <span>Already have an account? </span>
           <a href="/login">
             <span className="text-white ml-2 font-bold">Sign In</span>
           </a>

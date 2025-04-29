@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { LuMenuSquare } from "react-icons/lu";
 import { useSession } from "next-auth/react";
 import Sidebar from "../components/Sidebar";
 import DepositCrypto from "../components/DepositCrypto";
@@ -7,7 +8,6 @@ import WithdrawCrypto from "../components/WithdrawCrypto";
 import TransactionHistory from "../components/TransactionHistory";
 import TradeHistory from "../components/TradeHistory";
 import DashBoardNav from "../components/DashBoardNav";
-import { LuMenuSquare } from "react-icons/lu";
 
 interface Transaction {
   id: number;
@@ -40,7 +40,9 @@ const Page = () => {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [activeTab, setActiveTab] = useState<'transactions' | 'trades'>('transactions');
+  const [activeTab, setActiveTab] = useState<"transactions" | "trades">(
+    "transactions"
+  );
 
   const fetchBalance = async () => {
     try {
@@ -86,7 +88,6 @@ const Page = () => {
       }
 
       const data = await response.json();
-      console.log(data)
       setTransactions(data.data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -127,18 +128,21 @@ const Page = () => {
 
   return (
     <>
-      <DashBoardNav />
-      <div className="min-h-screen bg-[#0C0D0F] text-white pt-16">
-        <div className="flex flex-col md:flex-row">
-          {/* Mobile Hamburger Button */}
-          <button
-            className="md:hidden fixed top-20 left-4 z-40 bg-[#23262F] p-2 rounded-full shadow-lg"
-            onClick={() => setShowMobileSidebar(true)}
-            aria-label="Open sidebar"
-          >
-            <LuMenuSquare className="h-8 w-8 text-white" />
-          </button>
-          {/* Desktop Sidebar */}
+      <div className="min-h-screen bg-[#0C0D0F] text-white">
+        {/* Top Navigation */}
+        <DashBoardNav />
+
+        {/* Mobile Hamburger Button */}
+        <button
+          className="md:hidden fixed top-20 left-4 z-40 bg-[#23262F] p-2 rounded-full shadow-lg"
+          onClick={() => setShowMobileSidebar(true)}
+          aria-label="Open sidebar"
+        >
+          <LuMenuSquare className="h-8 w-8 text-white" />
+        </button>
+        {/* Main Content */}
+        <div className="flex pt-16">
+          {/* Sidebar */}
           <div className="hidden md:block">
             <Sidebar isSidebarOpen={isSidebarOpen} />
           </div>
@@ -151,13 +155,16 @@ const Page = () => {
               <div className="flex-1" onClick={() => setShowMobileSidebar(false)} />
             </div>
           )}
+
           {/* Main Content Area */}
           <div className={`flex-1 w-full ${isSidebarOpen ? 'md:ml-64' : ''}`}>
-            <div className="p-2 sm:p-4 md:p-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-8 mb-6">
+            <div className="p-6">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-8">
                 <div className="rounded-lg border shadow-sm w-full">
-                  <div className="flex flex-grow p-4 sm:p-6 items-center justify-between space-y-0 pb-2">
-                    <h3 className="tracking-tight text-sm font-medium">Wallet</h3>
+                  <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
+                    <h3 className="tracking-tight text-sm font-medium">
+                      Wallet
+                    </h3>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="24"
@@ -174,7 +181,7 @@ const Page = () => {
                       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                     </svg>
                   </div>
-                  <div className="p-4 sm:p-6 pt-0 flex w-full justify-between">
+                  <div className="p-6 pt-0 flex w-full justify-between">
                     <h3 className="text-2xl font-bold">${grandBalance}</h3>
                     <div className="">
                       <WithdrawCrypto />
@@ -182,7 +189,7 @@ const Page = () => {
                   </div>
                 </div>
                 <div className="rounded-lg border shadow-sm w-full">
-                  <div className="flex flex-grow p-4 sm:p-6 items-center justify-between space-y-0 pb-2">
+                  <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
                     <h3 className="tracking-tight text-sm font-medium">
                       Total Investments
                     </h3>
@@ -204,12 +211,12 @@ const Page = () => {
                       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                   </div>
-                  <div className="p-4 sm:p-6 pt-0">
+                  <div className="p-6 pt-0">
                     <h3 className="text-2xl font-bold">${investment}</h3>
                   </div>
                 </div>
                 <div className="rounded-lg border shadow-sm w-full">
-                  <div className="flex flex-grow p-4 sm:p-6 items-center justify-between space-y-0 pb-2">
+                  <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
                     <h3 className="tracking-tight text-sm font-medium">ROI</h3>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -226,13 +233,15 @@ const Page = () => {
                       <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path>
                     </svg>
                   </div>
-                  <div className="p-4 sm:p-6 pt-0">
+                  <div className="p-6 pt-0">
                     <h3 className="text-2xl font-bold">${ROI}</h3>
                   </div>
                 </div>
                 <div className="rounded-lg border shadow-sm w-full">
-                  <div className="flex flex-grow p-4 sm:p-6 items-center justify-between space-y-0 pb-2">
-                    <h3 className="tracking-tight text-sm font-medium">INVEST NOW</h3>
+                  <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
+                    <h3 className="tracking-tight text-sm font-medium">
+                      INVEST NOW
+                    </h3>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="24"
@@ -249,44 +258,49 @@ const Page = () => {
                       <line x1="2" x2="22" y1="10" y2="10"></line>
                     </svg>
                   </div>
-                  <div className="p-4 sm:p-6 pt-0">
+                  <div className="p-6 pt-0">
                     <DepositCrypto />
                   </div>
                 </div>
               </div>
 
+              {/* Tabs */}
               <div className="flex flex-col mt-8">
-                <div className="flex border-b border-[#23242a] overflow-x-auto">
+                <div className="flex border-b border-[#23242a]">
                   <button
-                    onClick={() => setActiveTab('transactions')}
+                    onClick={() => setActiveTab("transactions")}
                     className={`relative py-2 px-4 text-base font-medium focus:outline-none transition-colors
-                      ${activeTab === 'transactions'
-                        ? 'text-[#F0B90B]'
-                        : 'text-gray-400 hover:text-gray-200'}
-                    `}
-                    style={{ marginRight: '24px' }}
+                    ${
+                      activeTab === "transactions"
+                        ? "text-[#F0B90B]"
+                        : "text-gray-400 hover:text-gray-200"
+                    }
+                  `}
+                    style={{ marginRight: "24px" }}
                   >
                     Transaction History
-                    {activeTab === 'transactions' && (
+                    {activeTab === "transactions" && (
                       <span className="absolute left-0 -bottom-[1px] w-full h-1 bg-[#F0B90B] rounded-t"></span>
                     )}
                   </button>
                   <button
-                    onClick={() => setActiveTab('trades')}
+                    onClick={() => setActiveTab("trades")}
                     className={`relative py-2 px-4 text-base font-medium focus:outline-none transition-colors
-                      ${activeTab === 'trades'
-                        ? 'text-[#F0B90B]'
-                        : 'text-gray-400 hover:text-gray-200'}
-                    `}
+                    ${
+                      activeTab === "trades"
+                        ? "text-[#F0B90B]"
+                        : "text-gray-400 hover:text-gray-200"
+                    }
+                  `}
                   >
                     Trade History
-                    {activeTab === 'trades' && (
+                    {activeTab === "trades" && (
                       <span className="absolute left-0 -bottom-[1px] w-full h-1 bg-[#F0B90B] rounded-t"></span>
                     )}
                   </button>
                 </div>
-                <div className="mt-6 overflow-x-auto">
-                  {activeTab === 'transactions' ? (
+                <div className="mt-6">
+                  {activeTab === "transactions" ? (
                     <TransactionHistory transactions={transactions} />
                   ) : (
                     <TradeHistory trades={trades} />
@@ -301,4 +315,4 @@ const Page = () => {
   );
 };
 
-export default Page; 
+export default Page;

@@ -1,19 +1,21 @@
 'use client'
 import React, {useState, useEffect} from "react";
 import { useSession } from "next-auth/react";
-import DashBoardNav from "../components/DashBoardNav";
+
 import BitCoinChart from "../components/BitCoinChart";
-import DepositCrypto from "../components/DepositCrypto";
-import WithdrawCrypto from "../components/WithdrawCrypto";
-
-
+import MarketOverview from "../components/MarketOverview";
+import Sidebar from "../components/Sidebar";
+import DashBoardNav from "../components/DashBoardNav";
+import { LuMenuSquare } from "react-icons/lu";
 
 const Page = () => {
-
   const {data: session} = useSession()
   const [grandBalance, setGrandBalance] = useState(0)
   const [investment, setInvestment] = useState(0)
   const [ROI, setROI] = useState(0)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   const fetchBalance = async () => {
     try {
@@ -30,7 +32,6 @@ const Page = () => {
       }
 
       const data = await response.json();
-      console.log(data)
       setGrandBalance(data.data.balance);
       setInvestment(data.data.investment);
       setROI(data.data.ROI);
@@ -39,117 +40,89 @@ const Page = () => {
     }
   };
 
-  
   useEffect(() => {
     fetchBalance();
-  }, );
+  }, [session?.accessToken]);
+
   return (
-    <div>
+    <>
       <DashBoardNav />
-      <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 text-white">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-8">
-          <div className="rounded-lg border shadow-sm w-full ">
-            <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
-              <h3 className="tracking-tight text-sm font-medium">Wallet</h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-dollar-sign h-4 w-4 text-white"
-              >
-                <line x1="12" x2="12" y1="2" y2="22"></line>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
+      <div className="min-h-screen bg-[#0C0D0F] text-white pt-16">
+        {/* Main Content */}
+        <div className="flex flex-col md:flex-row">
+          {/* Mobile Hamburger Button */}
+          <button
+            className="md:hidden fixed top-20 left-4 z-40 bg-[#23262F] p-2 rounded-full shadow-lg"
+            onClick={() => setShowMobileSidebar(true)}
+            aria-label="Open sidebar"
+          >
+            <LuMenuSquare className="h-8 w-8 text-white" />
+          </button>
+          {/* Sidebar - hidden on small screens, overlay on mobile */}
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block">
+            <Sidebar isSidebarOpen={isSidebarOpen} />
+          </div>
+          {/* Mobile Sidebar Overlay */}
+          {showMobileSidebar && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex">
+              <div className="w-64 bg-[#1E2026] h-full shadow-lg animate-slide-in-left">
+                <Sidebar isSidebarOpen={true} />
+              </div>
+              <div className="flex-1" onClick={() => setShowMobileSidebar(false)} />
             </div>
-            <div className="p-6 pt-0 flex w-full justify-between">
-              <h3 className="text-2xl font-bold">${grandBalance}</h3>
-              <div className="">
-              <WithdrawCrypto/>
-            </div>
+          )}
+          {/* Main Content Area */}
+          <div className={`flex-1 w-full ${isSidebarOpen ? 'md:ml-64' : ''}`}> 
+            <div className="p-2 sm:p-4 md:p-6">
+              {/* Portfolio Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-[#1E2026] p-4 rounded-lg">
+                  <h3 className="text-sm text-gray-400">Total Balance</h3>
+                  <p className="text-2xl font-bold break-words">${grandBalance.toLocaleString()}</p>
+                </div>
+                <div className="bg-[#1E2026] p-4 rounded-lg">
+                  <h3 className="text-sm text-gray-400">Total Investment</h3>
+                  <p className="text-2xl font-bold break-words">${investment.toLocaleString()}</p>
+                </div>
+                <div className="bg-[#1E2026] p-4 rounded-lg">
+                  <h3 className="text-sm text-gray-400">ROI</h3>
+                  <p className="text-2xl font-bold break-words">${ROI.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex space-x-4   mb-6">
+                <a href="/deposit" className="bg-green-700 p-2 rounded-md">Deposit</a>
+                <a href="/withdraw" className="bg-white text-black p-2 rounded-md">Withdraw</a>
+              </div>
+
+              {/* Market Overview */}
+              <div className="mb-6">
+                <h2 className="text-xl font-bold mb-4">Market Overview</h2>
+                <MarketOverview />
+              </div>
+
+              {/* Trading Chart */}
+              <div className="bg-[#1E2026] rounded-lg p-2 sm:p-4 overflow-x-auto">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+                  <h2 className="text-xl font-bold">BTC/USDT</h2>
+                  <div className="flex space-x-2">
+                    <button className="px-3 py-1 bg-gray-800 rounded">1H</button>
+                    <button className="px-3 py-1 bg-gray-800 rounded">4H</button>
+                    <button className="px-3 py-1 bg-gray-800 rounded">1D</button>
+                    <button className="px-3 py-1 bg-gray-800 rounded">1W</button>
+                  </div>
+                </div>
+                <div className="h-[250px] md:h-[400px] w-full">
+                  <BitCoinChart />
+                </div>
+              </div>
             </div>
           </div>
-          <div className="rounded-lg border shadow-sm w-full ">
-            <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
-              <h3 className="tracking-tight text-sm font-medium">Total Investments</h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-users h-4 w-4 text-white"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-            </div>
-            <div className="p-6 pt-0">
-              <h3 className="text-2xl font-bold">${investment}</h3>
-            </div>
-          </div>
-          <div className="rounded-lg border shadow-sm w-full ">
-            <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
-              <h3 className="tracking-tight text-sm font-medium">ROI</h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-activity h-4 w-4 text-white"
-              >
-                <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path>
-              </svg>
-            </div>
-            <div className="p-6 pt-0">
-              <h3 className="text-2xl font-bold">${ROI}</h3>
-            </div>
-          </div>
-          <div className="rounded-lg border shadow-sm w-full ">
-            <div className="flex flex-grow p-6 items-center justify-between space-y-0 pb-2">
-              <h3 className="tracking-tight text-sm font-medium">INVEST NOW</h3>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="lucide lucide-credit-card h-4 w-4 text-white"
-              >
-                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-                <line x1="2" x2="22" y1="10" y2="10"></line>
-              </svg>
-            </div>
-            <div className="p-6 pt-0">
-              <DepositCrypto/>
-            </div>
-          </div>
-        </div>
-        <div className="h-[65dvh] w-full">
-          <BitCoinChart />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

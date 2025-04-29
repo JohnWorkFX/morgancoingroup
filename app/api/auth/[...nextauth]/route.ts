@@ -1,86 +1,101 @@
 import NextAuth from 'next-auth'
-import  CredentialsProvider  from 'next-auth/providers/credentials'
+import CredentialsProvider from 'next-auth/providers/credentials'
 
-
-interface LoginResponse{
+interface LoginResponse {
     tokens: {
         access: string;
         refresh: string
     };
-    user:{
+    user: {
         id: string;
-        email: string
-        username:string
+        email: string;
+        username: string;
+        email_verified: boolean;
     };
+    message: string;
 }
 
-interface User{
+interface User {
     id: string;
-    email:string;
-    username:string
-    accessToken: string
-
+    email: string;
+    username: string;
+    email_verified: boolean;
+    accessToken: string;
 }
 
 const handler = NextAuth({
     providers: [
         CredentialsProvider({
-            name:"Credentials",
-            credentials:{
-                email: {label:'Email', type: 'email'},
-                password: {label: 'Password', type: 'password'}
+            name: "Credentials",
+            credentials: {
+                email: { label: 'Email', type: 'email' },
+                password: { label: 'Password', type: 'password' }
             },
-            authorize: async(Credentials) => {
-                const response = await fetch(process.env.BACK_END_URL + '/auth/login', {
-                    method: "POST",
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(Credentials)
-                });
+            authorize: async (credentials) => {
+                try {
+                    const response = await fetch(process.env.BACK_END_URL + '/auth/login', {
+                        method: "POST",
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(credentials)
+                    });
 
-                if (response.ok){
-                    const data: LoginResponse = await response.json()
+                    const data: LoginResponse = await response.json();
+
+                    // Handle email verification error
+                    if (response.status === 403 && data.message.includes('verify')) {
+                        throw new Error('Please verify your email first');
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Authentication failed');
+                    }
 
                     if (data.tokens) {
-                        const accessToken = data.tokens.access
-                        const user: User = {...data.user, accessToken}
-                        return user
-                    }else {
-                        throw new Error('incorrect username and password')
+                        const accessToken = data.tokens.access;
+                        const user: User = {
+                            ...data.user,
+                            accessToken
+                        };
+                        return user;
                     }
-                }else{
-                    console.error(response)
-                    throw new Error('No server response')
+
+                    throw new Error('Invalid credentials');
+                } catch (error: any) {
+                    throw new Error(error.message || 'Authentication failed');
                 }
             }
         })
     ],
     callbacks: {
-        async jwt({token, user}) {
-            if (user){
-                const customUser = user as User
-                token.id = customUser.id
+        async jwt({ token, user }) {
+            if (user) {
+                const customUser = user as User;
+                token.id = customUser.id;
                 token.username = customUser.username;
-                token.accessToken = customUser.accessToken
+                token.email_verified = customUser.email_verified;
+                token.accessToken = customUser.accessToken;
             }
-            return token
+            return token;
         },
-        async session({session, token}) {
-            if (token){
+        async session({ session, token }) {
+            if (token) {
                 session.user = session.user || {};
                 session.user.id = token.id as string;
                 session.user.username = token.username as string;
-                session.accessToken = token.accessToken as string
+                session.user.email_verified = token.email_verified as boolean;
+                session.accessToken = token.accessToken as string;
             }
-            return session
-            
+            return session;
         }
     },
+    pages: {
+        signIn: '/login',
+        error: '/login',
+    },
     session: {
-        maxAge: 2 * 60 * 60, // 2 hours in seconds
-        updateAge: 60 * 60,  // Update session every hour (optional)
-      },
-      pages: {
-        signIn: '/login', // Customize the login page URL
-      },
+        maxAge: 2 * 60 * 60, // 2 hours
+        updateAge: 60 * 60,  // Update session every hour
+    },
 })
+
 export { handler as GET, handler as POST };
