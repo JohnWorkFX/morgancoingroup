@@ -31,16 +31,31 @@ const LoginForm = () => {
         email,
         password
       });
-
       if (result?.error) {
         if (result.error.includes('verify')) {
           setErr('Please verify your email first');
-          // Add resend verification button
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
           return;
         }
         setErr(result.error);
       } else {
-        router.push('/dashboard');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+        if (!response.ok) {
+          throw new Error("Login failed");
+        }
+        const data = await response.json();
+        if (data.redirect_to_admin) {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
+  
       }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -49,6 +64,8 @@ const LoginForm = () => {
       setLoading(false);
     }
   };
+
+  
 
   const handleResendVerification = async () => {
     setLoading(true);

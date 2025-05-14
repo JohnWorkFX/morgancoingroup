@@ -12,30 +12,34 @@ const coins = [
   { 
     symbol: "BTC", 
     name: "Bitcoin",
-    address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    address: "bc1qtm72dhtckhxgqf2pq58yg6l6pvpsr6fyw4mklp",
     icon: "/images/coins/bitcoin.svg",
-    coingeckoId: "bitcoin"
+    coingeckoId: "bitcoin",
+    network: "bitcoin",
   },
   { 
     symbol: "ETH", 
     name: "Ethereum",
-    address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+    address: "0xf08C039ECfFea6545fac33Da1A55803CFC4f5149",
     icon: "/images/coins/ethereum.svg",
-    coingeckoId: "ethereum"
+    coingeckoId: "ethereum",
+    network: "ethereum",
   },
   { 
     symbol: "USDT", 
     name: "Tether",
-    address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+    address: "TZCWqBHrHaw1wFdBpqfsZ7xN29EQEt1rjt",
     icon: "/images/coins/usdt.svg",
-    coingeckoId: "tether"
+    coingeckoId: "tether",
+    network: "trc20",
   },
   { 
     symbol: "BNB", 
     name: "Binance Coin",
-    address: "bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2",
+    address: "0xf08C039ECfFea6545fac33Da1A55803CFC4f5149",
     icon: "/images/coins/binance.svg",
-    coingeckoId: "binancecoin"
+    coingeckoId: "binancecoin",
+    network: "binance-smart-chain",
   },
 ];
 
@@ -102,7 +106,7 @@ const DepositPage = () => {
     setError('');
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transact/investment/create`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transact/invest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -235,6 +239,10 @@ const DepositPage = () => {
                   </div>
                   <div className="break-all text-sm text-gray-400 mb-4">
                     {activeCoin.address}
+                  </div>
+                  <div className="flex space-x-2 mb-4">
+                    <h1>Network:</h1>
+                    <h1 className="text-gray-400">{activeCoin.network}</h1>
                   </div>
                   <div className="flex justify-center p-4 bg-white rounded-lg">
                   <QRCodeCanvas value={ activeCoin.address} size={200} />

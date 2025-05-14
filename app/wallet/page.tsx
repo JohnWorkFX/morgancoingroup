@@ -1,79 +1,26 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Sidebar from "../components/Sidebar";
 import DashBoardNav from "../components/DashBoardNav";
 import { LuMenuSquare } from "react-icons/lu";
 
-// Placeholder asset data
-const mockAssets = [
-  {
-    icon: "/images/coins/bitcoin.svg",
-    name: "Bitcoin",
-    symbol: "BTC",
-    delisted: false,
-    amount: 0.0778,
-    usd: 0.0,
-    price: null,
-    costPrice: null,
-    pnl: 0.0,
-  },
-  {
-    icon: "/images/coins/binance.svg",
-    name: "BNB",
-    symbol: "BNB",
-    delisted: false,
-    amount: 0.00320702,
-    usd: 1.94,
-    price: 605.51,
-    costPrice: 578.62,
-    pnl: 0.02,
-  },
-  {
-    icon: "/images/coins/usdt.svg",
-    name: "TetherUS",
-    symbol: "USDT",
-    delisted: false,
-    amount: 0.35964048,
-    usd: 0.36,
-    price: 1.0,
-    costPrice: null,
-    pnl: null,
-  },
-  {
-    icon: "/images/coins/tron.svg",
-    name: "TRON",
-    symbol: "TRX",
-    delisted: false,
-    amount: 0.02612,
-    usd: 0.01,
-    price: 0.25,
-    costPrice: 0.09,
-    pnl: 0.0,
-  },
-  {
-    icon: "/images/coins/usdc.svg",
-    name: "USDC",
-    symbol: "USDC",
-    delisted: false,
-    amount: 0.00387665,
-    usd: 0.0,
-    price: 1.0,
-    costPrice: null,
-    pnl: null,
-  },
-];
-
 // Map asset symbols to CoinGecko IDs
 const COINGECKO_IDS: Record<string, string> = {
   BTC: "bitcoin",
-  BNB: "binancecoin",
+  ETH: "ethereum",
   USDT: "tether",
-  TRX: "tron",
-  USDC: "usd-coin",
-  // Add more as needed
+  BNB: "binancecoin", // Replace with actual CoinGecko ID if available
 };
 
+// interface UsdData {
+//   investment: Record<string, number>;
+//   ROI: Record<string, number>;
+//   balance: Record<string, number>;
+// }
+
 const WalletPage = () => {
+  const {data: session} = useSession()
   const [search, setSearch] = useState("");
   const [hideSmall, setHideSmall] = useState(false);
   const [tab, setTab] = useState("Coin View");
@@ -81,12 +28,40 @@ const WalletPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [prices, setPrices] = useState<Record<string, number>>({});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [assets, setAssets] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null);
 
-  // Placeholder balance and PnL
-  const btcBalance = 0.00002454;
-  const usdBalance = 2.31;
-  const todayPnl = 0.02;
-  const todayPnlPercent = 0.83;
+  // Fetch user assets
+  useEffect(() => {
+    const fetchAssets = async () => {
+      try {
+        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/assets`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/assets`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session?.accessToken}`, 
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch assets');
+        }
+        const data = await response.json();
+        setAssets(data);
+        console.log(data)
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch assets');
+        console.error(err);
+        setLoading(false);
+      }
+    };
+    fetchAssets();
+  }, [session?.accessToken]);
 
   // HTTP polling for real-time prices (every 60 seconds)
   useEffect(() => {
@@ -96,7 +71,6 @@ const WalletPage = () => {
       try {
         const res = await fetch(url);
         const data = await res.json();
-        // Map CoinGecko IDs to asset symbols
         const newPrices: Record<string, number> = {};
         for (const [symbol, id] of Object.entries(COINGECKO_IDS)) {
           if (data[id] && data[id].usd) {
@@ -105,18 +79,34 @@ const WalletPage = () => {
         }
         setPrices(newPrices);
       } catch (e) {
-        // Optionally handle error
-        console.log(e)
+        console.error('Failed to fetch prices:', e);
       }
     };
     fetchPrices();
-    const interval = setInterval(fetchPrices, 60000); // 60 seconds
+    const interval = setInterval(fetchPrices, 6000);
     return () => clearInterval(interval);
   }, []);
 
+  // Calculate USD values and update assets
+  useEffect(() => {
+    if (assets.length > 0 && Object.keys(prices).length > 0) {
+      const updatedAssets = assets.map(asset => {
+        const livePrice = prices[asset.symbol] ?? (asset.symbol === "USDT" ? 1.0 : null);
+        const usdValue = livePrice !== null ? asset.amount * livePrice : null;
+        return {
+          ...asset,
+          usd: usdValue,
+          price: livePrice
+        };
+      });
+      setAssets(updatedAssets);
+    }
+  }, [prices]);
+
   // Filtered assets
-  const filteredAssets = mockAssets.filter((asset) => {
-    if (hideSmall && asset.usd < 1) return false;
+  const filteredAssets = assets.filter((asset) => {
+    const usdValue = asset.usd ?? 0;
+    if (hideSmall && usdValue < 1) return false;
     if (
       search &&
       !asset.symbol.toLowerCase().includes(search.toLowerCase()) &&
@@ -125,6 +115,20 @@ const WalletPage = () => {
       return false;
     return true;
   });
+
+  // Calculate total balance and PnL
+  const totalBalance = filteredAssets.reduce((sum, asset) => sum + (asset.usd ?? 0), 0);
+  const totalPnl = filteredAssets.reduce((sum, asset) => sum + (asset.pnl ?? 0), 0);
+  const pnlPercentage = totalBalance > 0 ? (totalPnl / totalBalance) * 100 : 0;
+
+  // if (loading) {
+  //   return <div className="min-h-screen bg-[#0C0D0F] text-white pt-16">Loading...</div>;
+  // }
+
+  // if (error) {
+  //   return <div className="min-h-screen bg-[#0C0D0F] text-white pt-16">Error: {error}</div>;
+  // }
+
 
   return (
     <>
@@ -162,23 +166,19 @@ const WalletPage = () => {
                     Estimated Balance <span className="text-gray-400 cursor-pointer">🛈</span>
                   </div>
                   <div className="flex items-end gap-2 mt-2">
-                    <span className="text-3xl font-bold">{btcBalance.toFixed(8)}</span>
-                    <span className="text-gray-400 text-lg">BTC ▼</span>
+                    <span className="text-3xl font-bold">${totalBalance.toFixed(2)}</span>
                   </div>
-                  <div className="text-gray-400">≈ ${usdBalance.toFixed(2)}</div>
-                  <div className={`mt-1 text-sm ${todayPnl >= 0 ? "text-green-500" : "text-red-500"}`}>
-                    Today&apos;s PnL <span className="text-gray-400">🛈</span> {todayPnl >= 0 ? "+" : "-"}${Math.abs(todayPnl).toFixed(2)} ({todayPnlPercent >= 0 ? "+" : "-"}{Math.abs(todayPnlPercent).toFixed(2)}%)
+                  <div className={`mt-1 text-sm ${totalPnl >= 0 ? "text-green-500" : "text-red-500"}`}>
+                    Today&apos;s PnL <span className="text-gray-400">🛈</span> {totalPnl >= 0 ? "+" : "-"}${Math.abs(totalPnl).toFixed(2)} ({pnlPercentage >= 0 ? "+" : "-"}{Math.abs(pnlPercentage).toFixed(2)}%)
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-3 w-full md:w-auto mt-6 md:mt-0">
                   <div className="flex gap-2">
+                    <a href="/deposit" className="block">
                     <button className="bg-[#23262F] px-4 py-2 rounded text-white">Deposit</button>
-                    <button className="bg-[#23262F] px-4 py-2 rounded text-white">Withdraw</button>
+                    </a>
+                    <a href="/withdraw" className="block"><button className="bg-[#23262F] px-4 py-2 rounded text-white">Withdraw</button></a>
                     <button className="bg-[#23262F] px-4 py-2 rounded text-white">Transfer</button>
-                  </div>
-                  <div className="mt-4 md:mt-0">
-                    {/* Placeholder for chart */}
-                    <div className="h-16 w-32 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded"></div>
                   </div>
                 </div>
               </div>
@@ -232,39 +232,29 @@ const WalletPage = () => {
                           <td colSpan={4} className="text-center text-gray-500 py-8">No assets found.</td>
                         </tr>
                       )}
-                      {/*  eslint-disable-next-line @typescript-eslint/no-unused-vars */}
-                      {filteredAssets.map((asset, idx) => {
-                        let livePrice = null;
-                        if (asset.symbol === "USDT" || asset.symbol === "USDC") {
-                          livePrice = 1.0;
-                        } else if (prices[asset.symbol]) {
-                          livePrice = prices[asset.symbol];
-                        }
-                        const usdValue = livePrice !== null ? asset.amount * livePrice : null;
-                        return (
-                          <tr key={asset.symbol} className="border-t border-gray-800 hover:bg-[#23262F]">
-                            <td className="py-3 flex items-center gap-2">
-                              <img src={asset.icon} alt={asset.symbol} className="h-6 w-6 rounded-full bg-gray-700" />
-                              <span>{asset.symbol}</span>
-                            </td>
-                            <td className="py-3">
-                              {asset.amount}
-                              <div className="text-gray-400 text-xs">
-                                {usdValue !== null ? `$${usdValue.toFixed(2)}` : "--"}
-                              </div>
-                            </td>
-                            <td className="py-3">
-                              {livePrice !== null ? `$${livePrice}` : "--"}
-                              {asset.costPrice !== null && (
-                                <div className="text-gray-400 text-xs">${asset.costPrice}</div>
-                              )}
-                            </td>
-                            <td className={`py-3 ${asset.pnl !== null ? (asset.pnl > 0 ? "text-green-500" : asset.pnl < 0 ? "text-red-500" : "text-gray-400") : "text-gray-400"}`}>
-                              {asset.pnl !== null ? `${asset.pnl > 0 ? "+" : asset.pnl < 0 ? "-" : ""}$${Math.abs(asset.pnl).toFixed(2)}` : "--"}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {filteredAssets.map((asset) => (
+                        <tr key={asset.symbol} className="border-t border-gray-800 hover:bg-[#23262F]">
+                          <td className="py-3 flex items-center gap-2">
+                            <img src={asset.icon} alt={asset.symbol} className="h-6 w-6 rounded-full bg-gray-700" />
+                            <span>{asset.symbol}</span>
+                          </td>
+                          <td className="py-3">
+                            {asset.amount}
+                            <div className="text-gray-400 text-xs">
+                              {asset.usd !== null ? `$${asset.usd.toFixed(2)}` : "--"}
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            {asset.price !== null ? `$${asset.price}` : "--"}
+                            {asset.costPrice !== null && (
+                              <div className="text-gray-400 text-xs">${asset.costPrice}</div>
+                            )}
+                          </td>
+                          <td className={`py-3 ${asset.pnl !== null ? (asset.pnl > 0 ? "text-green-500" : asset.pnl < 0 ? "text-red-500" : "text-gray-400") : "text-gray-400"}`}>
+                            {asset.pnl !== null ? `${asset.pnl > 0 ? "+" : asset.pnl < 0 ? "-" : ""}$${Math.abs(asset.pnl).toFixed(2)}` : "--"}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>

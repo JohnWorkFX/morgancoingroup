@@ -8,41 +8,111 @@ import Sidebar from "../components/Sidebar";
 import DashBoardNav from "../components/DashBoardNav";
 import { LuMenuSquare } from "react-icons/lu";
 
+interface UsdData {
+  investment: Record<string, number>;
+  ROI: Record<string, number>;
+  balance: Record<string, number>;
+}
+
 const Page = () => {
   const {data: session} = useSession()
   const [grandBalance, setGrandBalance] = useState(0)
   const [investment, setInvestment] = useState(0)
   const [ROI, setROI] = useState(0)
+  const [usdData, setUsdData] = useState<UsdData | null>(null);
+  const [prices, setPrices] = useState<Record<string, number>>({});
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
-  const fetchBalance = async () => {
+
+
+  const COINGECKO_IDS: Record<string, string> = {
+    BTC: "bitcoin",
+    ETH: "ethereum",
+    USDT: "tether",
+    BNB: "binancecoin", // Replace with actual CoinGecko ID if available
+  };
+
+    const fetchBalance = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transact/balance`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`, 
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/transact/balance`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session?.accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch balance');
+        throw new Error("Failed to fetch balance");
       }
 
       const data = await response.json();
-      setGrandBalance(data.data.balance);
-      setInvestment(data.data.investment);
-      setROI(data.data.ROI);
+      setUsdData(data.data);
+      // setGrandBalance(data.data.balance);
+      // setInvestment(data.data.investment);
+      // setROI(data.data.ROI);
     } catch (error) {
-      console.error('Error fetching balance:', error);
+      console.error("Error fetching balance:", error);
     }
   };
+useEffect(() => {
+    const fetchPrices = async () => {
+      const ids = Object.values(COINGECKO_IDS).join(",");
+      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+
+      try {
+        const res = await fetch(url);
+        const priceData = await res.json();
+
+        const prices: Record<string, number> = {};
+        for (const [symbol, id] of Object.entries(COINGECKO_IDS)) {
+          if (priceData[id] && priceData[id].usd) {
+            prices[symbol] = priceData[id].usd;
+          }
+        }
+
+        setPrices(prices);
+      } catch (e) {
+        console.error("Failed to fetch prices:", e);
+      }
+    };
+
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+useEffect(() => {
+  if (!usdData || !prices || Object.keys(prices).length === 0) return;
+
+  const convertToUSD = (section: Record<string, number>) => {
+    let total = 0;
+    for (const [coin, amount] of Object.entries(section)) {
+      const price = prices[coin] ?? 0;
+      total += amount * price;
+    }
+    return parseFloat(total.toFixed(2));
+  };
+
+  const totalBalance = convertToUSD(usdData.balance);
+  const totalInvestment = convertToUSD(usdData.investment);
+  const totalROI = convertToUSD(usdData.ROI);
+
+  setGrandBalance(totalBalance);
+  setInvestment(totalInvestment);
+  setROI(totalROI);
+}, [usdData, prices]);
 
   useEffect(() => {
-    fetchBalance();
-  }, [session?.accessToken]);
+    if (session?.accessToken) {
+      fetchBalance();
+    }
+  }, [session]);
 
   return (
     <>

@@ -2,13 +2,27 @@ import React from 'react';
 
 interface Trade {
   id: number;
-  pair: string;
-  type: string;
-  amount: string;
-  price: string;
-  total: string;
-  date: string;
-  status: string;
+  user: number;
+  username: string;
+  trade_type: "buy" | "sell";
+  coin: string;
+  amount_invested: string;
+  profit_earned: string;
+  strategy: string | null;
+  trade_date: string; // ISO string date
+  transaction: {
+    id: number;
+    user: number;
+    transaction_type: string;
+    status: 'pending' | 'completed' | 'cancelled';
+    amount: string;
+    created_at: string;
+    description: string;
+    date: string;
+    coin: string;
+  };
+  open_price: string;
+  closing_price: string;
 }
 
 interface TradeHistoryProps {
@@ -26,8 +40,10 @@ const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
               <th className="h-12 px-4 text-left align-middle font-medium">Pair</th>
               <th className="h-12 px-4 text-left align-middle font-medium">Type</th>
               <th className="h-12 px-4 text-left align-middle font-medium">Amount</th>
-              <th className="h-12 px-4 text-left align-middle font-medium">Price</th>
-              <th className="h-12 px-4 text-left align-middle font-medium">Total</th>
+              <th className="h-12 px-4 text-left align-middle font-medium">Opening Price</th>
+              <th className="h-12 px-4 text-left align-middle font-medium">Closing Price</th>
+              <th className="h-12 px-4 text-left align-middle font-medium">Profit Earned</th>
+              {/* <th className="h-12 px-4 text-left align-middle font-medium">Total</th> */}
               <th className="h-12 px-4 text-left align-middle font-medium">Status</th>
             </tr>
           </thead>
@@ -38,34 +54,35 @@ const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
                 className="border-b transition-colors hover:bg-slate-600 data-[state=selected]:bg-slate-300"
               >
                 <td className="p-4 align-middle">
-                  {new Date(trade.date).toLocaleDateString()}
+                  {new Date(trade.transaction.date).toLocaleDateString()}
                 </td>
-                <td className="p-4 align-middle">{trade.pair}</td>
+                <td className="p-4 align-middle">{trade.coin}</td>
                 <td className="p-4 align-middle">
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      trade.type === 'buy'
+                      trade.trade_type === 'buy'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {trade.type.toUpperCase()}
+                    {trade.trade_type.toUpperCase()}
                   </span>
                 </td>
-                <td className="p-4 align-middle">{trade.amount}</td>
-                <td className="p-4 align-middle">${trade.price}</td>
-                <td className="p-4 align-middle">${trade.total}</td>
+                <td className="p-4 align-middle">{trade.amount_invested} {trade.coin}</td>
+                <td className="p-4 align-middle">${trade.open_price}</td>
+                <td className="p-4 align-middle">${trade.closing_price}</td>
+                <td className="p-4 align-middle">{trade.profit_earned} {trade.coin}</td>
                 <td className="p-4 align-middle">
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      trade.status === 'completed'
+                      trade.transaction.status === 'completed'
                         ? 'bg-green-100 text-green-800'
-                        : trade.status === 'failed'
+                        : trade.transaction.status === 'cancelled'
                         ? 'bg-red-100 text-red-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}
                   >
-                    {trade.status.toUpperCase()}
+                    {trade.transaction.status.toUpperCase()}
                   </span>
                 </td>
               </tr>

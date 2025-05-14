@@ -7,6 +7,7 @@ interface Transaction {
   amount: string;
   created_at: string;
   description: string;
+  coin: string;
 }
 
 interface TransactionHistoryProps {
@@ -36,7 +37,10 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions })
                 <td className="p-4 align-middle">
                   {new Date(transaction.created_at).toLocaleDateString()}
                 </td>
-                <td className="p-4 align-middle">${transaction.amount}</td>
+                <td className="p-4 align-middle space-x-2">
+                  <span>{transaction.amount}</span>
+                  <span>{transaction.coin}</span>
+                </td>
                 <td className="p-4 align-middle">
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
