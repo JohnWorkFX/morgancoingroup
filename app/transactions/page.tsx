@@ -16,18 +16,33 @@ interface Transaction {
   status: string;
   amount: string;
   created_at: string;
+  coin: string;
   description: string;
 }
 
 interface Trade {
   id: number;
-  pair: string;
-  type: string;
-  amount: string;
-  price: string;
-  total: string;
-  date: string;
-  status: string;
+  user: number;
+  username: string;
+  trade_type: "buy" | "sell";
+  coin: string;
+  amount_invested: string;
+  profit_earned: string;
+  strategy: string | null;
+  trade_date: string; // ISO string date
+  transaction: {
+    id: number;
+    user: number;
+    transaction_type: string;
+    status: 'pending' | 'completed' | 'cancelled';
+    amount: string;
+    created_at: string;
+    description: string;
+    date: string;
+    coin: string;
+  };
+  open_price: string;
+  closing_price: string;
 }
 
 const Page = () => {
