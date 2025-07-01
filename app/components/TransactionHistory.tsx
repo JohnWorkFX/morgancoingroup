@@ -3,6 +3,7 @@ import React from 'react';
 interface Transaction {
   id: number;
   transaction_type: string;
+  user: number;
   status: string;
   amount: string;
   created_at: string;
