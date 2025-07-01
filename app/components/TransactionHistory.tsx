@@ -10,6 +10,7 @@ interface Transaction {
   date?: string | null; // ISO string date
   description: string;
   coin: string;
+  
 }
 
 interface TransactionHistoryProps {
