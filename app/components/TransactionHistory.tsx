@@ -6,6 +6,7 @@ interface Transaction {
   status: string;
   amount: string;
   created_at: string;
+  date: string | null; // ISO string date
   description: string;
   coin: string;
 }
@@ -35,7 +36,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions })
                 className="border-b transition-colors hover:bg-slate-600 data-[state=selected]:bg-slate-300"
               >
                 <td className="p-4 align-middle">
-                  {new Date(transaction.created_at).toLocaleDateString()}
+                  {new Date(transaction.date ? transaction.date : transaction.created_at).toLocaleDateString()}
                 </td>
                 <td className="p-4 align-middle space-x-2">
                   <span>{transaction.amount}</span>

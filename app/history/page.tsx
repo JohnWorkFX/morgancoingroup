@@ -17,6 +17,7 @@ interface Transaction {
   amount: string;
   created_at: string;
   coin: string;
+  date: string | null; // ISO string date
   description: string;
 }
 
