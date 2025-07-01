@@ -7,7 +7,7 @@ interface Transaction {
   status: string;
   amount: string;
   created_at: string;
-  date: string | null; // ISO string date
+  date?: string | null; // ISO string date
   description: string;
   coin: string;
 }
