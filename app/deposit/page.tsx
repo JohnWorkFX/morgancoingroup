@@ -12,7 +12,7 @@ const coins = [
   { 
     symbol: "BTC", 
     name: "Bitcoin",
-    address: "bc1qtm72dhtckhxgqf2pq58yg6l6pvpsr6fyw4mklp",
+    address: "bc1qflm7lhe2js6w752uemjxmlqufh07a7qpyfyjxe",
     icon: "/images/coins/bitcoin.svg",
     coingeckoId: "bitcoin",
     network: "bitcoin",
